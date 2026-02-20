@@ -1,6 +1,7 @@
 package org.example;
 
 import javafx.application.Application;
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -8,89 +9,122 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
+import javafx.scene.layout.*;
+import javafx.scene.paint.*;
 import javafx.stage.Stage;
-import java.net.URL;
 
 public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) {
-        // Zentrum: großer, fetter Schriftzug "Improve"
-        Label title = new Label("Improve");
-        title.setFont(Font.font("System", FontWeight.BOLD, 90));
-        StackPane center = new StackPane(title);
-        center.setPadding(new Insets(20));
-        VBox.setVgrow(center, Priority.ALWAYS);
 
-        // Erinnerungen Bereich mit Label und Buttons
-        Label reminderField = new Label("Reminder");
-        reminderField.setFont(Font.font("Segoe UI", FontWeight.BOLD, 20));
+        // ---------------- TOPBAR ----------------
+        Label title = new Label("IMPROVE");
+        Label streak = new Label("Streak: 5 🔥");
 
-        Button TDL_button = new Button("To-Do-List");
-        TDL_button.setStyle("-fx-padding: 10px 20px; -fx-font-size: 14;");
-        TDL_button.setOnAction(e -> {
-            Scene toDoScene = ToDoView.createScene(stage);
-            stage.setScene(toDoScene);
+        HBox topBar = new HBox(title, new Region(), streak);
+        HBox.setHgrow(topBar.getChildren().get(1), Priority.ALWAYS);
+        topBar.setPadding(new Insets(20));
+        topBar.setAlignment(Pos.CENTER_LEFT);
+
+
+        // ---------------- SIDEBAR ----------------
+        VBox sidebar = new VBox(30);
+        sidebar.setPadding(new Insets(30));
+        sidebar.setStyle("-fx-background-color: #4A4A4A;");
+
+        Button homeBtn = createImageButton("icon.png");
+        Button tdlBtn = createImageButton("icon.png");
+        Button sleepBtn = createImageButton("icon.png");
+        Button statsBtn = createImageButton("icon.png");
+
+        sidebar.getChildren().addAll(homeBtn, tdlBtn, sleepBtn, statsBtn);
+        sidebar.setAlignment(Pos.TOP_CENTER);
+
+
+        // ---------------- CONTENT AREA ----------------
+        Label quote = new Label("\"Discipline beats motivation.\"");
+        quote.setStyle("-fx-font-style: italic;");
+
+        StackPane contentArea = new StackPane(quote);
+        contentArea.setAlignment(Pos.CENTER);
+
+
+        // ---------------- ROOT LAYOUT ----------------
+        BorderPane root = new BorderPane();
+        root.setTop(topBar);
+        root.setLeft(sidebar);
+        root.setCenter(contentArea);
+
+        // ---------------- BACKGROUND GRADIENT ----------------
+        root.setBackground(
+            new Background(
+                new BackgroundFill(
+                    new LinearGradient(
+                        0, 0, 0, 1, true,
+                        CycleMethod.NO_CYCLE,
+                        new Stop(0, Color.web("#FFF5EB")),
+                        new Stop(1, Color.web("#FFEAD5"))
+                    ),
+                    CornerRadii.EMPTY,
+                    Insets.EMPTY
+                )
+            )
+        );
+
+        Scene scene = new Scene(root, 1600, 900);
+
+
+        // ---------------- RESPONSIVE SCALING ----------------
+
+        // Titel sehr groß
+        title.styleProperty().bind(
+                Bindings.concat("-fx-font-size: ",
+                        scene.widthProperty().divide(18).asString(),
+                        "px; -fx-font-weight: bold;")
+        );
+
+        streak.styleProperty().bind(
+                Bindings.concat("-fx-font-size: ",
+                        scene.widthProperty().divide(45).asString(), "px;")
+        );
+
+        quote.styleProperty().bind(
+                Bindings.concat("-fx-font-size: ",
+                        scene.widthProperty().divide(28).asString(),
+                        "px; -fx-font-style: italic;")
+        );
+
+        // Sidebar‑Breite dynamisch
+        sidebar.prefWidthProperty().bind(scene.widthProperty().divide(10));
+
+        // Icon‑Größe dynamisch
+        sidebar.getChildren().forEach(node -> {
+            if (node instanceof Button btn && btn.getGraphic() instanceof ImageView img) {
+                img.fitWidthProperty().bind(scene.widthProperty().divide(20));
+            }
         });
 
-        Button SleepTracker_button = new Button("Sleep Tracker");
-        SleepTracker_button.setStyle("-fx-padding: 10px 20px; -fx-font-size: 14;");
 
-        HBox buttonBox = new HBox(10, TDL_button, SleepTracker_button);
-        buttonBox.setAlignment(Pos.CENTER);
-
-        HBox reminderBox = new HBox(20, reminderField, buttonBox);
-        reminderBox.setAlignment(Pos.CENTER);
-        reminderBox.setPadding(new Insets(20));
-
-        // Streak Label oben rechts
-        Label Streak_Label = new Label("Streak");
-        Streak_Label.setFont(Font.font("System", FontWeight.BOLD, 20));
-        Streak_Label.setStyle("-fx-text-fill: #FC876A; -fx-border-width: 2px; -fx-border-radius: 10px; -fx-padding: 5px;");
-
-        HBox topBox = new HBox(Streak_Label);
-        topBox.setPadding(new Insets(10));
-        topBox.setAlignment(Pos.TOP_RIGHT);
-
-        // Icon links
-        URL iconResource = getClass().getResource("/icon.png");
-        String iconPath = (iconResource != null) ? iconResource.toExternalForm() : null;
-        ImageView imageView = null;
-
-        if (iconPath != null) {
-            Image img = new Image(iconPath);
-            imageView = new ImageView(img);
-            imageView.setFitHeight(100);
-            imageView.setFitWidth(100);
-            imageView.setPreserveRatio(true);
-        }
-
-        VBox leftBox = new VBox(imageView);
-        leftBox.setPadding(new Insets(10));
-        leftBox.setAlignment(Pos.TOP_LEFT);
-
-        // Root Layout
-        BorderPane root = new BorderPane();
-        root.setTop(topBox);
-        root.setCenter(center);
-        root.setBottom(reminderBox);
-        root.setLeft(leftBox);
-
-        Scene scene = new Scene(root, 800, 500);
+        stage.setTitle("Improve Dashboard");
         stage.setScene(scene);
-        stage.setTitle("Improve! Your App for sustainable development");
-        if (iconPath != null) {
-            stage.getIcons().add(new Image(iconPath));
-        }
         stage.show();
     }
+
+
+    // ---------------- HILFSMETHODE: Bild-Button ----------------
+    private Button createImageButton(String imagePath) {
+        ImageView img = new ImageView(new Image(imagePath));
+        img.setPreserveRatio(true);
+
+        Button btn = new Button();
+        btn.setGraphic(img);
+        btn.setStyle("-fx-background-color: transparent;");
+        btn.setMaxWidth(Double.MAX_VALUE);
+
+        return btn;
+    }
+
 
     public static void main(String[] args) {
         launch();
