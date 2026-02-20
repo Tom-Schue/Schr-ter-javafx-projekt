@@ -31,7 +31,7 @@ public class MainApp extends Application {
         // ---------------- SIDEBAR ----------------
         VBox sidebar = new VBox(30);
         sidebar.setPadding(new Insets(30));
-        sidebar.setStyle("-fx-background-color: #4A4A4A;");
+        sidebar.setStyle("-fx-background-color: #CFC6BA ;");
 
         Button homeBtn = createImageButton("icon.png");
         Button tdlBtn = createImageButton("icon.png");
